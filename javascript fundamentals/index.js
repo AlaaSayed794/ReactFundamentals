@@ -70,11 +70,37 @@ function init() {
         return out
     }
 
+    const promise = new Promise((resolve, reject) => {
+        setTimeout(resolve, 3000)
+    })
+    const promise2 = new Promise((resolve, reject) => {
+        setTimeout(resolve, 1000)
+    })
+    const promiseResolver = async () => {
+        await promise
+        console.log("waited 3")
+        await promise2
+        console.log("waited 2")
 
+        console.log("after promise")
+    }
 
+    promiseResolver()
 
+    const ourFetch = (uri, method = "GET", body) => {
+        let fetchObj = {
+            method: method.toUpperCase(),
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json"
+            }
+        }
+        if (body && typeof body == "object") {
+            fetchObj.body = JSON.stringify(body)
+        }
+        return fetch(uri, fetchObj).then(data => data.json())
+    }
 
-
-
+    ourFetch("https://jsonplaceholder.typicode.com/users").then(data => console.log(data))
 
 }
