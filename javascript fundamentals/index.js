@@ -70,37 +70,49 @@ function init() {
         return out
     }
 
-    const promise = new Promise((resolve, reject) => {
-        setTimeout(resolve, 3000)
-    })
-    const promise2 = new Promise((resolve, reject) => {
-        setTimeout(resolve, 1000)
-    })
-    const promiseResolver = async () => {
-        await promise
-        console.log("waited 3")
-        await promise2
-        console.log("waited 2")
 
-        console.log("after promise")
-    }
+    const promise = (input) => {
+        return new Promise((resolve, reject) => {
 
-    promiseResolver()
-
-    const ourFetch = (uri, method = "GET", body) => {
-        let fetchObj = {
-            method: method.toUpperCase(),
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json"
+            if (isNaN(input)) {
+                reject("this is not a number")
             }
-        }
-        if (body && typeof body == "object") {
-            fetchObj.body = JSON.stringify(body)
-        }
-        return fetch(uri, fetchObj).then(data => data.json())
+            else {
+                setTimeout(() => { resolve(`waited ${input}`) }, input)
+            }
+        })
     }
+    const main = async () => {
+        //resolve promise and handle then and catch
+        promise(2000).then(data => console.log(data)).catch(err => console.log(err))
+        //resolve invalid input promise and handle then and catch
+        promise("invalid").then(data => console.log(data)).catch(err => console.log(err))
+        //using await in async function
+        const data = await promise(3000)
+        console.log(data)
 
-    ourFetch("https://jsonplaceholder.typicode.com/users").then(data => console.log(data))
+        //here we wrap the fetch so we don't type the same options many times when we fetchs
+        const ourFetch = (uri, method = "GET", body) => {
+            const baseURL = "https://jsonplaceholder.typicode.com/"
+            let fetchObj = {
+                method: method.toUpperCase(),
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application,json"
+                }
+            }
+            if (body && typeof body == "object" && method.toLowerCase() != "get") {
+                fetchObj.body = JSON.stringify(body)
+            }
+            return fetch(baseURL + uri, fetchObj)
+        }
+        //add new post to json placeholder api
+        ourFetch("posts", "post", {
+            title: 'foo',
+            body: 'bar',
+            userId: 1,
+        }).then(res => res.json()).then(data => console.log(data))
+    }
+    main()
 
 }
